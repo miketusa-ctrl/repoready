@@ -1,0 +1,35 @@
+---
+# RepoReady by Harlo (formerly Digital Promo Hub) - Node.js test matrix
+name: CI Node
+"on":
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - name: Detect package.json
+        id: detect
+        run: |
+          if [ -f package.json ]; then echo "found=true" >> "$GITHUB_OUTPUT"; else echo "found=false" >> "$GITHUB_OUTPUT"; echo "No package.json - skipping"; fi
+          if [ -f package-lock.json ]; then echo "lock=true" >> "$GITHUB_OUTPUT"; else echo "lock=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        if: steps.detect.outputs.found == 'true'
+        with:
+          node-version: ${{ matrix.node }}
+          cache: ${{ steps.detect.outputs.lock == 'true' && 'npm' || '' }}
+      - name: Install
+        if: steps.detect.outputs.found == 'true'
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Test
+        if: steps.detect.outputs.found == 'true'
+        run: npm test --if-present
