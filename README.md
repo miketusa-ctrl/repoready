@@ -6,7 +6,7 @@ By **Harlo** (formerly Digital Promo Hub). Not affiliated with GitHub, Inc.
 
 **Download:** grab `RepoReady-Lite.zip` from this repo's Releases page.
 
-5 CI-verified, SHA-pinned GitHub Actions workflows + repo hygiene. MIT licensed.
+5 SHA-pinned GitHub Actions workflows + repo hygiene (MIT). Node/Python/Go CI matrices are verified green in the public demo; `release-on-tag` and `stale` are lint-clean and ready to enable.
 
 | File | What it does | Secrets / setup |
 |---|---|---|
