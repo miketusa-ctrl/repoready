@@ -1,0 +1,29 @@
+---
+# RepoReady by Harlo (formerly Digital Promo Hub) - GitHub Release on v* tag
+name: Release on tag
+"on":
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          fetch-depth: 0
+      - name: Build release notes
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [ -f CHANGELOG.md ] && awk -v t="$tag" '$0 ~ "^## \\[?"t {f=1; next} /^## / {f=0} f' CHANGELOG.md > notes.md && [ -s notes.md ]; then
+            echo "Using CHANGELOG.md section for $tag"
+          else
+            prev=$(git describe --tags --abbrev=0 "$tag^" 2>/dev/null || true)
+            if [ -n "$prev" ]; then git log --pretty='- %s (%h)' "$prev..$tag" > notes.md; else git log --pretty='- %s (%h)' > notes.md; fi
+          fi
+          [ -s notes.md ] || echo "Release $tag" > notes.md
+      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2
+        with:
+          body_path: notes.md
+          fail_on_unmatched_files: false
