@@ -1,0 +1,28 @@
+---
+# RepoReady by Harlo (formerly Digital Promo Hub) - Go test matrix
+name: CI Go
+"on":
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.21", "1.22"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - name: Detect go.mod
+        id: detect
+        run: if [ -f go.mod ]; then echo "found=true" >> "$GITHUB_OUTPUT"; else echo "found=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff  # v5
+        if: steps.detect.outputs.found == 'true'
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Test
+        if: steps.detect.outputs.found == 'true'
+        run: go test ./...
